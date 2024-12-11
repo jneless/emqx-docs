@@ -161,6 +161,11 @@ This section demonstrates how to create a rule in the Dashboard for processing m
 
    * **Exchange**: Enter `test_exchange` created before, which means messages will be published to this exchange.
 
+       ::: tip
+
+       **Note**: Make sure the **Exchange** has been created in RabbitMQ, otherwise the action will be temporarily broken and periodically try to re-create the connection.
+       :::
+
    * **Routing Key**: Enter `test_routing_key` created before, which is the RabbitMQ routing key for publishing messages.
 
        ::: tip
