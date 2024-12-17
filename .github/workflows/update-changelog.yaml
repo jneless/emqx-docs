@@ -84,8 +84,8 @@ jobs:
 
           ./update-changelog.sh dev/changes "$MAJOR.$MINOR.$PATCH"
 
-          git add en_US/changes/changes-ce-v5.md
-          git add en_US/changes/changes-ee-v5.md
+          git add en_US/changes/changes-*-v5.md
+          git add en_US/changes/breaking-changes-*.md
           git commit -m "chore: update changelog for ${EMQX_VERSION}"
           git push origin $NEW_BRANCH
 
