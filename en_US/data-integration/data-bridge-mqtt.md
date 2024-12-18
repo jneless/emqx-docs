@@ -47,9 +47,9 @@ Before creating an MQTT Broker data integration, you need to obtain the connecti
 
 The data integration provides good compatibility and support for EMQX or other standard MQTT servers. If you need to connect to other types of MQTT services, you can refer to their relevant documentation to obtain the connection information. Generally, most IoT platforms provide standard MQTT access methods, and you can convert device information into the aforementioned MQTT connection information based on their guidance.
 
-:::tip Note 
+:::tip Note
 
-When EMQX is running in cluster mode or when a connection pool is enabled, using the same client ID to connect multiple nodes to the same MQTT service usually leads to device conflicts. Therefore, the MQTT message bridge currently does not support setting a fixed client ID. 
+When EMQX is running in cluster mode or when a connection pool is enabled, using the same client ID to connect multiple nodes to the same MQTT service usually leads to device conflicts. Therefore, the MQTT message bridge currently does not support setting a fixed client ID.
 
 :::
 
@@ -101,7 +101,7 @@ This section demonstrates how to create a rule for specifying data to be forward
 
 2. Click **Create** at the top right of the page.
 
-3. Enter the rule ID `my_rule`. 
+3. Enter the rule ID `my_rule`.
 
 4. In the **SQL Editor**, enter the rule to store MQTT messages from the `t/#` topic to the remote MQTT server. The rule SQL is as follows:
 
@@ -132,6 +132,16 @@ This section demonstrates how to create a rule for specifying data to be forward
 You have now successfully created the rule. You can see the newly created rule on the **Integration** -> **Rules** page. Click the **Actions(Sink)** tab and you can see the new MQTT Broker Sink.
 
 You can also click **Integration** -> **Flow Designer** to view the topology. The topology visually represents how messages under the topic `t/#` are sent to the remote MQTT Broker after being processed by the rule `my_rule`.
+
+Note that, if using MQTTv5 protocol, publish properties are forwarded to the remote broker as is if the `pub_props` field is selected by the rule SQL, as in the `select * from t/#` example from this section.  If one wishes to dynamically add more user properties, one can just add then to the `pub_props` field that the rule outputs.  For example, the following rule will add an user property with key and value taken from the incoming payload:
+
+```sql
+SELECT
+  *,
+  map_put(concat('User-Property.', payload.extra_key), payload.extra_value, pub_props) as pub_props
+FROM
+  't/#'
+```
 
 ## Test the Rule with MQTT Broker Sink
 
@@ -186,7 +196,7 @@ This section demonstrates how to create a rule for forwarding data from a remote
 
 8. Configure the Source information to complete the subscription from the external MQTT service to EMQX:
 
-   - **Topic**: The subscription topic, supporting the use of `+` and `#` wildcards. 
+   - **Topic**: The subscription topic, supporting the use of `+` and `#` wildcards.
 
      ::: tip
 
@@ -266,4 +276,3 @@ You can use [MQTTX CLI](https://mqttx.app/zh/cli) to test the configured rule fo
    [2024-1-31] [16:49:22] › topic: sub/f/1
    payload: I'm from broker.emqx.io
    ```
-
