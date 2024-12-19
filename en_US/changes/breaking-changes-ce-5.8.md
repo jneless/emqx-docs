@@ -1,5 +1,9 @@
 # Incompatible Changes in EMQX 5.8
 
+## v5.8.4
+
+- [#14360](https://github.com/emqx/emqx/pull/14360) When requesting Prometheus metrics in JSON format, now the `client` top-level key will always be an array of JSON objects instead of a single JSON object.
+
 ## v5.8.3
 
 - [#14305](https://github.com/emqx/emqx/pull/14305) Removed support of md4, md5 and ripemd160 in authentication as they are not compliant with [NIST Secure Hash Standard](https://www.nist.gov/publications/secure-hash-standard).
