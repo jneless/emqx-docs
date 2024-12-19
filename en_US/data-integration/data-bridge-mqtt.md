@@ -47,9 +47,9 @@ Before creating an MQTT Broker data integration, you need to obtain the connecti
 
 The data integration provides good compatibility and support for EMQX or other standard MQTT servers. If you need to connect to other types of MQTT services, you can refer to their relevant documentation to obtain the connection information. Generally, most IoT platforms provide standard MQTT access methods, and you can convert device information into the aforementioned MQTT connection information based on their guidance.
 
-:::tip Note 
+:::tip Note
 
-When EMQX is running in cluster mode or when a connection pool is enabled, using the same client ID to connect multiple nodes to the same MQTT service usually leads to device conflicts. Therefore, the MQTT message bridge currently does not support setting a fixed client ID. 
+When EMQX is running in cluster mode or when a connection pool is enabled, using the same client ID to connect multiple nodes to the same MQTT service usually leads to device conflicts. Therefore, the MQTT message bridge currently does not support setting a fixed client ID.
 
 :::
 
@@ -101,7 +101,7 @@ This section demonstrates how to create a rule for specifying data to be forward
 
 2. Click **Create** at the top right of the page.
 
-3. Enter the rule ID `my_rule`. 
+3. Enter the rule ID `my_rule`.
 
 4. In the **SQL Editor**, enter the rule to store MQTT messages from the `t/#` topic to the remote MQTT server. The rule SQL is as follows:
 
@@ -186,7 +186,7 @@ This section demonstrates how to create a rule for forwarding data from a remote
 
 8. Configure the Source information to complete the subscription from the external MQTT service to EMQX:
 
-   - **Topic**: The subscription topic, supporting the use of `+` and `#` wildcards. 
+   - **Topic**: The subscription topic, supporting the use of `+` and `#` wildcards.
 
      ::: tip
 
@@ -267,3 +267,14 @@ You can use [MQTTX CLI](https://mqttx.app/zh/cli) to test the configured rule fo
    payload: I'm from broker.emqx.io
    ```
 
+## Static client IDs
+
+In some use cases, one only has a finite set of client IDs that can be used in an integration.  In this case, it's possible to assign static client ID sets to individual nodes while configuring the connector.  To do so, simply fill in the list of client IDs each node in the EMQX cluster will use.  An example configuration:
+
+| Node            | Client IDs               |
+|:----------------|--------------------------|
+| `emqx@10.0.0.1` | `clientid1`, `clientid3` |
+| `emqx@10.0.0.2` | `clientid2`              |
+| `emqx@10.0.0.3` | `clientid4`, `clientid5` |
+
+If any static client IDs are configured, then only MQTT connections using those client IDs will be started.  This means that configurations for dynamic client IDs such as `pool_size` and `clientid_prefix` won't take effect.
