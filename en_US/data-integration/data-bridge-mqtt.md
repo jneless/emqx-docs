@@ -112,6 +112,20 @@ This section demonstrates how to create a rule for specifying data to be forward
      "t/#"
    ```
 
+   If you're using the MQTTv5 protocol, the publish properties are forwarded to the remote broker as-is, provided that the `pub_props` field is included in the rule SQL. This is the case in the `SELECT * FROM t/#` example shown above.
+
+   To dynamically add more user properties, you can include them in the `pub_props` field that the rule outputs. For example, the following rule will add a user property with key and value taken from the incoming payload:
+
+   ```sql
+   SELECT
+     *,
+     map_put(concat('User-Property.', payload.extra_key), payload.extra_value, pub_props) as pub_props
+   FROM
+     't/#'
+   ```
+
+   This ensures that custom user properties from the payload are included in the MQTT message sent to the remote broker.
+
 5. Add an action by selecting `MQTT Broker` from the **Action Type** dropdown list. Keep the **Action** dropdown as the default `Create Action` option. This demonstration creates a new Sink and adds it to the rule.
 
 6. Enter the name and description for the Sink in the form below.
