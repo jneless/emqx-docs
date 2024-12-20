@@ -18,7 +18,7 @@ EMQX 中的 Tablestore 数据集成将 EMQX 的实时数据捕获和传输能力
 
 <!--需要新插图-->
 
-![MQTT to Tablestore](/Users/emqx/Documents/GitHub/emqx-docs/zh_CN/data-integration/assets/mqtt-to-influxdb.jpg)
+![MQTT to Tablestore](./assets/mqtt-to-influxdb.jpg)
 
 
 在这个架构中，EMQX 负责设备接入、消息传输和路由，而 Tablestore 作为存储和分析平台。数据流向如下：
@@ -64,6 +64,8 @@ EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。
 3. 在**实例详情**标签页中，选择**时序表列表**，并点击**创建时序表**按钮。
 4. 为实例提供一个名称，例如 `qa-ots-series`。
 
+![tablestore_instance_manage](./assets/tablestore_instance_manage.png)
+
 有关创建实例的详细说明，请参考 [Tablestore 官方文档](https://www.alibabacloud.com/help/zh/tablestore/getting-started/?spm=a2c63.p38356.help-menu-27278.d_1.58c83c19VFZqZL)。
 
 ### 管理时间序列表
@@ -79,6 +81,8 @@ EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。
    此步骤是可选的。如果时序列表尚未创建，Tablestore 在数据写入时会自动创建时间线。因此，本示例未演示手动添加时间线的步骤。
 
    :::
+
+![tablestore_timeline_mamge](./assets/tablestore_timeline_mamge.png)
 
 ## 创建连接器
 

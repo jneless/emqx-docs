@@ -64,7 +64,7 @@ Before you proceed, make sure you have the following:
 3. In the **Instance Details** tab, select **Time Series Table** and click the **Create Time Series Table** button.
 4. Provide a name for the instance, for example, `qa-ots-series`.
 
-![img](https://docs.emqx.com/assets/instance_manage.mXB-wpcu.png)
+![img](./assets/tablestore_instance_manage.png)
 
 For detailed instructions on creating an instance, refer to the [official Tablestore documentation](https://www.alibabacloud.com/help/en/tablestore/getting-started/procedure-of-using-tablestore?spm=a2c63.p38356.0.i2).
 
@@ -82,7 +82,7 @@ To manage the Time Series Table created earlier, click on the table name to ente
 
    :::
 
-![img](https://docs.emqx.com/assets/timeline_mamge.Jyb0PqYh.png)
+![img](./assets/tablestore_timeline_mamge.png)
 
 ## Create a Connector
 
