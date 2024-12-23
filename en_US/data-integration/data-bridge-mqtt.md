@@ -63,7 +63,7 @@ This section guides you on how to configure a connection with a remote MQTT serv
 4. Enter a **name** for the connector, which must be a combination of upper/lower case letters and numbers, for example, `my_mqtt_bridge`.
 5. Configure the connection information:
    - **MQTT Broker**: Only supports MQTT over TCP/TLS. Set this to `broker.emqx.io:1883`.
-   - **ClientID Prefix**: This can be left blank. In actual use, specifying a client ID prefix can facilitate client management. EMQX will automatically generate client IDs based on the client ID prefix and the size of the connection pool.
+   - **ClientID Prefix**: This can be left blank. In actual use, specifying a client ID prefix can facilitate client management. EMQX will automatically generate client IDs based on the client ID prefix and the size of the connection pool. For more information, see [Connection Pool and Client ID Generation Rules](#connection-pool-and-client-id-generation-rules).
    - **Username** and **Password**: These can be left blank, as authentication is not required for this server.
 
 Leave the other configurations as default and click the **Create** button to complete the creation of the Connector. The Connector can be used for both Sink and Source. Next, you can create data bridge rules based on this Connector.
@@ -92,6 +92,20 @@ To address this issue, from version 5.7.1 onwards, EMQX has implemented the foll
 - **With prefix**:
   - **Prefix up to 19 bytes**: The prefix is preserved, and the remainder of the client ID is hashed into a 4-byte space capping the length within 23 bytes.
   - **Prefix of 20 bytes or more**: EMQX will use the configured prefix, and no longer attempts to shorten the client ID.
+
+### Configure Static Client IDs
+
+In some use cases, you may only have a finite set of client IDs to use in an integration. In this case, it is possible to assign static client ID sets to individual nodes while configuring the connector. To configure static client IDs, provide a list of client IDs for each node in your EMQX cluster during the Connector setup. Below is an example configuration:
+
+| Node            | Client IDs               |
+| :-------------- | ------------------------ |
+| `emqx@10.0.0.1` | `clientid1`, `clientid3` |
+| `emqx@10.0.0.2` | `clientid2`              |
+| `emqx@10.0.0.3` | `clientid4`, `clientid5` |
+
+Static client IDs can only be configured through the configuration file and are not available for setup through the Dashboard UI. You can define the `static_clientids` parameter for each node individually in configuration files.
+
+If static client IDs are configured, only MQTT connections using these client IDs will be started. Any configurations for dynamic client IDs, such as `pool_size` or `clientid_prefix`, will not take effect.
 
 ## Create a Rule with MQTT Broker Sink
 
@@ -266,15 +280,3 @@ You can use [MQTTX CLI](https://mqttx.app/zh/cli) to test the configured rule fo
    [2024-1-31] [16:49:22] › topic: sub/f/1
    payload: I'm from broker.emqx.io
    ```
-
-## Static client IDs
-
-In some use cases, one only has a finite set of client IDs that can be used in an integration.  In this case, it's possible to assign static client ID sets to individual nodes while configuring the connector.  To do so, simply fill in the list of client IDs each node in the EMQX cluster will use.  An example configuration:
-
-| Node            | Client IDs               |
-|:----------------|--------------------------|
-| `emqx@10.0.0.1` | `clientid1`, `clientid3` |
-| `emqx@10.0.0.2` | `clientid2`              |
-| `emqx@10.0.0.3` | `clientid4`, `clientid5` |
-
-If any static client IDs are configured, then only MQTT connections using those client IDs will be started.  This means that configurations for dynamic client IDs such as `pool_size` and `clientid_prefix` won't take effect.
