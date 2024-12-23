@@ -14,23 +14,20 @@ EMQX 中的 Tablestore 数据集成将 EMQX 的实时数据捕获和传输能力
 
 数据存储完成后，Tablestore 提供强大的分析工具，包括生成报告、图表和其他可视化的能力，用户可以通过 Tablestore 的可视化功能查看这些分析结果。
 
-以下是 EMQX 与 Tablestore 之间典型的数据集成架构，适用于物联网应用，如车联网：
+下图展示了储能场景中 EMQX 和 Tablestore 数据集成的典型架构。
 
-<!--需要新插图-->
+![MQTT to Tablestore](./assets/mqtt-to-tablestore.png)
 
-![MQTT to Tablestore](./assets/mqtt-to-influxdb.jpg)
+EMQX 和 Tablestore 提供了一个可扩展的物联网平台，用于高效地实时收集和分析能耗数据。在此架构中，EMQX 作为物联网平台，负责设备接入、消息传输、数据路由等功能，Tablestore 作为数据存储和分析平台，负责数据存储、数据分析等功能。具体的工作流程如下：
 
+1. **消息发布与接收**：储能设备通过 MQTT 协议连接成功后定期发布能耗数据，这些数据包括电量、输入输出功率信息。EMQX 接收到消息后将在规则引擎中进行比对。
+2. **规则引擎处理消息**：通过内置的规则引擎，可以根据主题匹配处理特定来源的消息。当消息到达时，它会通过规则引擎，规则引擎会匹配对应的规则，并对消息数据进行处理，例如转换数据格式、过滤掉特定信息或使用上下文信息丰富消息。
+3. **写入到 Tablestore**：规则引擎中定义的规则触发将消息写入到 Tablestore 的操作。Tablestore Sink 提供了 可配置的字段，能够灵活地定义写入的数据格式，将消息中的特定字段写入到 Tablestore 的对应的表和列中。
 
-在这个架构中，EMQX 负责设备接入、消息传输和路由，而 Tablestore 作为存储和分析平台。数据流向如下：
+储能数据写入到 Tablestore 后，您可以对数据进行分析，例如：
 
- 1. **消息发布与接收**：车联网中的物联网设备（如联网汽车、传感器）通过 MQTT 与 EMQX 建立连接，并定期发布诸如车速、位置、油量等数据。EMQX 在接收到这些消息后，通过其规则引擎处理并路由数据。
- 2. **消息数据处理**：内置的规则引擎根据定义的主题匹配处理传入的消息。它对数据进行转换、筛选相关信息，并根据需要为数据添加额外的上下文。
- 3. **数据摄取到 Tablestore**：规则引擎触发将数据写入 Tablestore 的操作。通过 Tablestore Sink，EMQX 支持使用行协议（Line Protocol）的灵活数据格式，将消息字段映射到 Tablestore 中相应的字段进行存储。
-
-数据存储到 Tablestore 后，您可以利用其完整的分析功能，如：
-
-- 连接可视化工具（如 Grafana）创建基于存储数据的图表和仪表板。
-- 与业务系统集成，用于监控、警报和车联网设备的状态报告。
+- 连接到可视化工具，例如 Grafana，根据数据生成图表，展示储能数据。
+- 连接业务系统，进行储能设备状态监控与告警。
 
 ## 特性与优势
 
@@ -44,11 +41,11 @@ Tablestore 数据集成具有以下特性与优势：
 
 ## 准备工作
 
-本节介绍了在 EMQX 中创建 Tablestore Sink 之前需要完成的准备工作，包括创建数据库实例和管理时序表。
+本节介绍了在 EMQX 中创建 Tablestore Sink 之前需要完成的准备工作，包括创建数据库实例，创建时序表和管理时序表。
 
 ::: tip
 
-EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。因此，以下步骤将专注于介绍时序模型的相关数据集成操作。
+EMQX 与 Tablestore 的数据集成目前仅支持时序模型。因此，以下步骤将专注于介绍时序模型的相关数据集成操作。
 
 :::
 
@@ -57,18 +54,17 @@ EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。
 - 了解[规则](./rules.md)。
 - 了解[数据集成](./data-bridges.md)。
 
-### 创建数据库实例
+### 创建时序表
 
 1. 登录到 [Tablestore 控制台](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6)。
-2. 转到**实例管理**页面。
-3. 在**实例详情**标签页中，选择**时序表列表**，并点击**创建时序表**按钮。
-4. 为实例提供一个名称，例如 `qa-ots-series`。
+2. 创建时序模型数据库实例。为实例提供一个名称，例如 `emqx-demo`。有关创建实例的详细说明，请参考 [Tablestore 官方文档](https://help.aliyun.com/zh/tablestore/getting-started/use-timeseries-model-in-tablestore-console?spm=a2c4g.11186623.help-menu-27278.d_1_2_0.6809619404X61r&scm=20140722.H_342856._.OR_help-T_cn~zh-V_1)。
+3. 转到**实例管理**页面。
+4. 在**实例详情**标签页中，选择**时序表列表**，并点击**创建时序表**按钮。
+5. 配置时序表信息，为时序表提供一个名称，例如 `timeseries_demo_with_data`。点击**确定**。
 
 ![tablestore_instance_manage](./assets/tablestore_instance_manage.png)
 
-有关创建实例的详细说明，请参考 [Tablestore 官方文档](https://www.alibabacloud.com/help/zh/tablestore/getting-started/?spm=a2c63.p38356.help-menu-27278.d_1.58c83c19VFZqZL)。
-
-### 管理时间序列表
+### 管理时序表
 
 要管理之前创建的时序表，请点击表格名称进入时序表管理界面。在那里，您可以根据业务需求执行以下操作：
 
@@ -97,12 +93,12 @@ EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。
 
    - 输入连接器名称，名称应由字母和数字的组合组成。示例：`my_tablestore`。
    - 输入 Tablestore 服务器连接信息：
-     - **端点**：输入您的 Tablestore 实例的访问 URL。这应是托管您 Tablestore 服务的地址，您可以在 Tablestore 控制台的实例详情页面找到该地址。
-     - **实例名称**：要连接的 Tablestore 实例名称。在本示例中，使用之前创建的名称：`qa-ots-series`。
+     - **端点**：输入您的 Tablestore 实例的访问地址。这应是托管您 Tablestore 服务的地址，您可以在 Tablestore 控制台的实例详情页面找到该地址。按照部署方式的不同，填写不同的域名。比如，公网地址为：`https://emqx-demo.cn-hangzhou.ots.aliyuncs.com`。
+     - **实例名称**：要连接的 Tablestore 实例名称。在本示例中，使用之前创建的名称：`emqx-demo`。
      - **访问密钥 ID**：用于与 Tablestore 认证的 Access Key ID。此密钥由阿里云颁发，用于安全访问 Tablestore 资源。
      - **访问密钥**：与 Access Key ID 相关联的用于认证的 Access Key Secret。
-     - **存储模型类型**：默认选择`时序`。
-   - 设置是否启用TLS。有关 TLS 连接选项的详细信息，请参阅[启用 TLS 加密访问外部资源](../network/overview.md#启用-tls-加密访问外部资源)。
+     - **存储模型类型**：目前仅支持`时序`。
+   - 配置 TLS 参数。Tablestore 使用 HTTPS 端点，故默认情况下 TLS 已经启用，并且无需配置 TLS 参数。有关 TLS 连接选项的详细信息，请参阅[启用 TLS 加密访问外部资源](../network/overview.md#启用-tls-加密访问外部资源)。
 5. 在点击**创建**之前，您可以点击**测试连接**，以测试连接器是否能够连接到 Tablestore 服务器。
 6. 点击最下方的**创建**按钮完成连接器的创建。在弹出对话框中，您可以点击 **返回连接器列表** 或点击 **创建规则** 继续创建规则和 Sink，以指定要转发到 Tablestore 的数据。具体步骤请参见[创建 Tablestore Sink 规则](#创建-tablestore-sink-规则)。
 
@@ -148,19 +144,32 @@ EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。
 9. 配置以下字段：
 
    - **数据源**：EMQX 从中获取消息的数据源，表示正在处理的数据的来源。可以是特定的主题或数据流。
+
    - **表名**：数据将存储到 Tablestore 的表名。输入您之前创建的表名。您还可以使用变量（如 `${table}`）动态分配表名。
-   - **度量名称**：在 Tablestore 中使用的度量名称，通常对应于数据的逻辑分组或类别。例如，它可以是类似 `temperature_readings` 或 `sensor_data` 的名称。使用 `${measurement}` 进行动态分配。
-   - **存储模型类型**：Tablestore 使用的数据存储模型类型。默认为 `timeseries`，优化用于基于时间的数据。
-   - **标签**：标签是与每个数据项关联的键值对，可以用来添加元数据或标签，以便更容易查询和过滤。您可以点击**添加**来定义多个标签，例如 `location = "office1"`、`device = "sensor1"` 等。
+
+   - **度量名称**：在 Tablestore 中使用的度量名称，通常对应于数据的逻辑分组或类别。例如，它可以是类似 `temperature_readings` 或 `sensor_data` 的名称。 您还可以使用变量（如 `${measurement}`）动态分配度量名称。
+
+   - **存储模型类型**：Tablestore 使用的数据存储模型类型。目前仅支持 `timeseries`，优化用于基于时间的数据。
+
+   - **标签**：标签是与每个数据项关联的键值对，可以用来添加元数据或标签，以便更容易查询和过滤。您可以点击**添加**来定义多个标签，例如：
+
+     | 键         | 值        |
+     | ---------- | --------- |
+     | `location` | `office1` |
+     | `device`   | `sensor1` |
+
    - **字段**：字段列表，指定哪些数据将发送到 Tablestore。每个字段都映射到 Tablestore 表中的一列。您可以点击**添加**来添加以下内容：
-     - **列**：Tablestore 中的列名。
-     - **消息的值**：分配给列的值。该值可以是动态引用（如 `${msg}`）、布尔值（`true`）、数字（`1.3`）或二进制数据。
-     - **是否为整数**：如果列要求整数值，将此标志设置为 `true`。
-     - **是否为二进制**：如果列要求二进制数据，将此标志设置为 `true`。
-   - **时间戳**：Tablestore 中记录的时间戳。通常表示数据接收的时间或事件发生的时间。您可以指定一个固定值，也可以使用 `${timestamp}` 动态分配，基于消息的时间戳进行分配。对于时间序列数据来说，这非常重要，可以确保记录按时间正确索引。
+     
+     - **列**：Tablestore 中的列名。列名可以用变量。如 `${column_name}`。
+     - **消息的值**：分配给列的值。该值可以是动态引用（如 `${value}`）、布尔值（`true`）、数字（`1.3`）或二进制数据。
+     - **是否为整数**：如果列是数值类型，EMQX 默认按照浮点类型插入 Tablestore。如果想要插入整数值，需要将此标志设置为 `true`。若通过配置文件配置，可以使用变量（如：`${isint}`）动态分配。
+     - **是否为二进制**：若该列为二进制，EMQX 默认按照字符串类型插入 Tablestore。如果想要插入二进制数据，需要此标志设置为 `true`。若通过配置文件配置，可以使用变量（如：`${isbinary}`）动态分配。
+     
+   - **时间戳**：Tablestore 中记录的时间戳，整数值，单位为微秒。表示要插入到 Tablestore 的时间戳。您可以指定一个固定值，或者填写 "NOW" 字符串来表示希望 EMQX 动态填入处理消息时的当前时间，也可以使用变量占位符（如 `${microsecond_timestamp}`) 动态分配。
+
    - **元数据更新模式**：定义 Tablestore 中元数据的更新策略：
      - `MUM_IGNORE`：忽略元数据更新，即使存在冲突更新，也确保元数据保持不变。
-     - `MUM_NORMAL`：正常更新元数据，在发生冲突时可能会覆盖现有的元数据。
+     - `MUM_NORMAL`：正常更新元数据，若元数据不存在，则在写入数据前动态创建元数据；若与现有元数据发生冲突，则可能会覆盖。
 
 10. 展开**高级设置**，根据需要配置高级设置选项（可选），详细请参考[高级设置](#高级设置)。
 
@@ -179,12 +188,14 @@ EMQX 与 Tablestore 的数据集成使用时序模型作为数据存储模型。
 使用 MQTTX 向 `t/1` 主题发布消息，此操作同时会触发上下线事件：
 
 ```bash
-mqttx pub -i emqx_c -t t/1 -m '{ "msg": "hello Tablestore" }'
+mqttx pub -i emqx_c -t t/1 -m '{ "table": "timeseries_demo_with_data", "measurement": "foo", "microsecond_timestamp": 1734924039271024, "column_name": "cc", "value": 1}'
 ```
 
 分别查看两个 Sink 运行统计，命中、发送成功次数均 +1。
 
-前往 [Tablestore UI Data Explorer](http://localhost:8086) 查看数据是否已经写入 Tablestore 中。
+前往 [Tablestore 控制台](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6) 查看数据是否已经写入 Tablestore 中。输入度量名称（演示使用的是 `foo`），client ID 为 `123456`，我们使用 `client=123456` 作为查询条件，点击查询。
+
+![tablestore_query_data](./assets/tablestore_query_data.png)
 
 ## 高级设置
 

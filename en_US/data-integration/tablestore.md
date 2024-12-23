@@ -13,22 +13,20 @@ Tablestore data integration in EMQX seamlessly combines EMQX's real-time data ca
 
 Once the data is stored, Tablestore provides powerful tools for analysis, including the ability to generate reports, charts, and other visualizations, which are then presented to users via Tablestore’s visualization features.
 
-The typical data integration architecture between EMQX and Tablestore for IoT applications, such as vehicle networking, is illustrated below:
+The diagram below illustrates the typical data integration architecture between EMQX and Tablestore in an energy storage scenario.
 
-<!--Need a new illustration-->
+![MQTT to Tablestore](./assets/mqtt-to-tablestore.png)
 
-![MQTT to Tablestore](/Users/emqx/Documents/GitHub/emqx-docs/en_US/data-integration/assets/mqtt-to-influxdb.jpg)
+EMQX and Tablestore provide an extensible IoT platform for efficiently collecting and analyzing energy consumption data in real-time. In this architecture, EMQX serves as the IoT platform, handling device access, message transmission, and data routing, while Tablestore serves as the data storage and analysis platform, responsible for data storage and analysis functions. The workflow is as follows:
 
-In this architecture, EMQX handles device access, message transmission, and routing, while Tablestore acts as the storage and analysis platform. The data flow is as follows:
+1. **Message publication and reception**: Energy storage devices and Industrial IoT devices establish successful connections to EMQX through the MQTT protocol and regularly publish energy consumption data using the MQTT protocol, including information such as power consumption, input/output power, etc. When EMQX receives these messages, it initiates the matching process within its rules engine.  
+2. **Message data processing**: Using the built-in rule engine, messages from specific sources can be processed based on topic matching. When a message arrives, it passes through the rule engine, which matches it with the corresponding rule and processes the message data, such as transforming data formats, filtering specific information, or enriching messages with contextual information.
+3. **Data ingestion into Tablestore**: Rules defined in the rule engine trigger the operation of writing messages to Tablestore. The Tablestore Sink provides configurable fields that allow flexible definitions of the data format to be written, mapping specific fields from the message to the corresponding measurement and field in Tablestore.
 
-1. **Message Publication and Reception**: IoT devices in vehicle networks (e.g., connected cars, sensors) establish connections to EMQX via MQTT and regularly publish data such as vehicle speed, location, fuel level, etc. Upon receiving these messages, EMQX uses its rule engine to process and route the data.
-2. **Message Data Processing**: The built-in rule engine processes incoming messages based on defined topic matches. It transforms data, filters relevant information, and enriches the data with additional context as required.
-3. **Data Ingestion into Tablestore**: The rule engine triggers the operation of writing data to Tablestore. Through the Tablestore Sink, EMQX supports flexible data formats using Line Protocol, which maps the message fields to corresponding fields in Tablestore for storage.
+After energy consumption data is written to Tablestore, you can analyze the data, for example:
 
-Once the data is stored in Tablestore, you can leverage its full analytical capabilities, such as:
-
-- Connecting to visualization tools like Grafana to create charts and dashboards based on stored data.
-- Integrating with business systems for monitoring, alerting, and status reporting of vehicle network devices.
+- Connect to visualization tools like Grafana to generate charts based on the data, displaying energy storage data.
+- Connect to business systems for monitoring and alerting on the status of energy storage devices.
 
 ## Features and Benefits
 
@@ -42,11 +40,11 @@ The Tablestore data integration offers the following features and advantages:
 
 ## Before You Start
 
-This section describes the preparations you need to complete before you start creating the Tablestore data integration, including creating a database instance and managing a time series table.
+This section describes the preparations you need to complete before you start creating the Tablestore data integration, including creating a database instance, creating and managing a time series table.
 
 ::: tip
 
-EMQX integrates with Tablestore using the TimeSeries model. Therefore, the following steps focus on the TimeSeries model for data integration.
+Currently, the data integration with Tablestore only supports the TimeSeries model. Therefore, the following steps focus on the TimeSeries model for data integration.
 
 :::
 
@@ -57,16 +55,15 @@ Before you proceed, make sure you have the following:
 - Understanding of EMQX data integration [rules](./rules.md).
 - Knowledge of how [data integration](./data-bridges.md) works in EMQX.
 
-### Create a Database Instance
+### Create a Time Series Table
 
 1. Log in to the [Tablestore console](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6).
-2. Navigate to **Instances**.
-3. In the **Instance Details** tab, select **Time Series Table** and click the **Create Time Series Table** button.
-4. Provide a name for the instance, for example, `qa-ots-series`.
+2. Create a time series model instance. Provide a name for the instance, such as `emqx-demo`. For detailed instructions on creating an instance, refer to the [Tablestore official documentation](https://www.alibabacloud.com/help/en/tablestore/getting-started/use-timeseries-model-in-tablestore-console?spm=a2c63.p38356.help-menu-27278.d_1_2_0.6d7d5e92tyvDzj#section-247-wkm-e7a).
+3. Navigate to the **Instance Management** page.
+4. In the **Instance Details** tab, select **Time Series Tables** and click the **Create Time Series Table** button.
+5. Configure the time series table information, providing a name for the table, such as `timeseries_demo_with_data`. Click **Confirm**.
 
 ![img](./assets/tablestore_instance_manage.png)
-
-For detailed instructions on creating an instance, refer to the [official Tablestore documentation](https://www.alibabacloud.com/help/en/tablestore/getting-started/procedure-of-using-tablestore?spm=a2c63.p38356.0.i2).
 
 ### Manage a Time Series Table
 
@@ -96,12 +93,12 @@ The following steps assume that you run both EMQX and Tablestore on the local ma
 4. In the **Configuration** step, configure the following information:
    - Enter the connector name, which should be a combination of upper and lower case letters and numbers. Example: `my_tablestore`.
    - Enter the Tablestore server connection information:
-     - **Endpoint**: Enter the access URL for your Tablestore instance. This should be the address where your Tablestore service is hosted, and you can find it on the Instance details page in your Tablestore console.
-     - **Instance Name**: The name of the Tablestore instance to connect to. In this example, use the name you created before: `qa-ots-series`.
+     - **Endpoint**: Enter the access URL for your Tablestore instance. This should be the address where your Tablestore service is hosted, and you can find it on the Instance details page in your Tablestore console. Enter the URL according to your deployment method, for example `https://emqx-demo.cn-hangzhou.ots.aliyuncs.com` for public network.
+     - **Instance Name**: The name of the Tablestore instance to connect to. In this example, use the name you created before: `emqx-demo`.
      - **Access Key ID**: The Access Key ID used to authenticate with Tablestore. This key is issued by Alibaba Cloud for accessing Tablestore resources securely.
      - **Access Key Secret**: The Access Key Secret used for authentication, associated with the Access Key ID.
-     - **Storage Model Type**: Select TimeSeries by default.
-   - Determine whether to enable TLS. For detailed information on TLS connection options, see [TLS for External Resource Access](../network/overview.md#enabling-tls-for-external-resource-access).
+     - **Storage Model Type**: Currently only `TimeSeries` is supported.
+   - Configure TLS Parameters. Tablestore uses HTTPS endpoints, so TLS is enabled by default and no additional TLS parameter configuration is required. For detailed information on TLS connection options, see [TLS for External Resource Access](../network/overview.md#enabling-tls-for-external-resource-access).
 5. Before clicking **Create**, you can click **Test Connectivity** to test if the connector can connect to the Tablestore server.
 6. Click the **Create** button at the bottom to complete the creation of the connector. In the pop-up dialog, you can click **Back to Connector List** or click **Create Rule** to continue creating rules and Sink to specify the data to be forwarded to Tablestore. For detailed steps, see [Create a Rule with Tablestore Sink](#create-a-rule-with-tablestore-sink).
 
@@ -143,19 +140,31 @@ This section demonstrates how to create a rule in EMQX to process messages from 
 9. Configure the following fields:
 
    - **Data Source**: The data source from which EMQX retrieves the message. It represents the origin of the data being processed. This could be a specific topic or data stream.
+
    - **Table Name**: The name of the Tablestore table where the data will be stored. Enter the table name you created before. You can also dynamically assign a table name using variables such as `${table}`.
-   - **Measurement**: The measurement name used in Tablestore, which typically corresponds to a logical grouping or category of data. For example, it could be something like `temperature_readings` or `sensor_data`. Use `${measurement}` for dynamic assignment.
-   - **Storage Model Type**: The type of data storage model used in Tablestore. It is`timeseries` by default, optimized for time-based data.
-   - **Tags**: Tags are key-value pairs associated with each data entry in Tablestore. These can be used to add metadata or labels to the data for easier querying and filtering. You can click **Add** to define multiple tags, such as `location = "office1"`, `device = "sensor1"`, etc.
+
+   - **Measurement**: The measurement name used in Tablestore, which typically corresponds to a logical grouping or category of data. For example, it could be something like `temperature_readings` or `sensor_data`. You can also use variables (e.g., `${measurement}`) to dynamically assign the metric name.
+
+   - **Storage Model Type**: The type of data storage model used in Tablestore. Currently, on `timeseries`  is supported, optimized for time-based data.
+
+   - **Tags**: Tags are key-value pairs associated with each data entry in Tablestore. These can be used to add metadata or labels to the data for easier querying and filtering. You can click **Add** to define multiple tags, for example:
+
+     | 键         | 值        |
+     | ---------- | --------- |
+     | `location` | `office1` |
+     | `device`   | `sensor1` |
+
    - **Fields**:  A list of fields specifying which data is sent to Tablestore. Each field is mapped to a column in the Tablestore table. You can click **Add** to add the following:
-     - **Column**: The name of the column in Tablestore.
-     - **Message value**: The value to be assigned to the column. The value can be a dynamic reference (like `${msg}`), a boolean (`true`), a number (`1.3`), or binary data.
-     - **Is Int**: If the column expects an integer, set this flag to `true`.
-     - **Is Binary**: If the column expects binary data, set this flag to `true`.
-   - **Timestamp**: The timestamp for the record in Tablestore. This typically represents when the data was received or when the event occurred. You can specify a fixed value or use `${timestamp}` for dynamic assignment based on the message's timestamp. This is important for time-series data to ensure that records are properly indexed by time.
+     - **Column**: The name of the column in Tablestore. The column name can be defined using variables, such as `${column_name}`, which should match the field in the payload of the message example sent later.
+     - **Message value**: The value to be assigned to the column. The value can be a dynamic reference (like `${value}`), a boolean (`true`), a number (`1.3`), or binary data.
+     - **Is Int**: If the column is of numeric type, EMQX will, by default, insert it into Tablestore as a floating-point type. To insert integer values, this flag needs to be set to `true`. When configuring through the configuration file, variables (e.g., `${isint}`) can be used to dynamically assign this flag.
+     - **Is Binary**: If the column is binary, EMQX will, by default, insert it into Tablestore as a string type. To insert binary data, this flag needs to be set to `true`. When configuring through the configuration file, variables (e.g., `${isbinary}`) can be used to dynamically assign this flag.
+     
+   - **Timestamp**: The timestamp recorded in Tablestore, represented as an integer value in microseconds. This specifies the timestamp to be inserted into Tablestore. You can provide a fixed value, use the string "NOW" to indicate that EMQX should dynamically fill in the current time when processing the message, or use a variable placeholder (e.g., `${microsecond_timestamp}`) for dynamic assignment.
+
    - **Meta Update Model**: Defines the update strategy for metadata in Tablestore:
      - `MUM_IGNORE`: Ignores metadata updates, ensuring that metadata remains unchanged even if there are conflicting updates.
-     - `MUM_NORMAL`: Updates metadata normally, which might overwrite existing metadata in case of conflicts.
+     - `MUM_NORMAL`: Performs a normal metadata update. If the metadata does not exist, it will be dynamically created before writing the data. If there is a conflict with existing metadata, it may be overwritten.
 
 10. Advanced settings (optional):  See [Advanced Configurations](#advanced-configurations).
 
@@ -174,12 +183,14 @@ You can also click **Integration** -> **Flow Designer** to view the topology. It
 Use MQTTX  to send a message to topic  `t/1`  to trigger an online/offline event.
 
 ```bash
-mqttx pub -i emqx_c -t t/1 -m '{ "msg": "hello Tablestore" }'
+mqttx pub -i emqx_c -t t/1 -m '{ "table": "timeseries_demo_with_data", "measurement": "foo", "microsecond_timestamp": 1734924039271024, "column_name": "cc", "value": 1}'
 ```
 
 Check the running status of the Sink, there should be one new incoming and one new outgoing message.
 
-In the Tablestore UI, you can confirm whether the message is written into the Tablestore via the **Data Explorer** window.
+Go to the [Tablestore Console](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6) to check if the data has been written into Tablestore. Enter the metric name (in this demo, it is `foo`), with the client ID `123456`. Use `client=123456` as the query condition, then click **Search**.
+
+![tablestore_query_data](./assets/tablestore_query_data.png)
 
 ## Advanced Configurations
 
