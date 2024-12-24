@@ -149,7 +149,7 @@ This section demonstrates how to create a rule in EMQX to process messages from 
 
    - **Tags**: Tags are key-value pairs associated with each data entry in Tablestore. These can be used to add metadata or labels to the data for easier querying and filtering. You can click **Add** to define multiple tags, for example:
 
-     | 键         | 值        |
+     | Key        | Value     |
      | ---------- | --------- |
      | `location` | `office1` |
      | `device`   | `sensor1` |
@@ -180,17 +180,20 @@ You can also click **Integration** -> **Flow Designer** to view the topology. It
 
 ## Test the Rule
 
-Use MQTTX  to send a message to topic  `t/1`  to trigger an online/offline event.
+1. Use MQTTX  to send a message to topic  `t/1`  to trigger an online/offline event.
 
-```bash
-mqttx pub -i emqx_c -t t/1 -m '{ "table": "timeseries_demo_with_data", "measurement": "foo", "microsecond_timestamp": 1734924039271024, "column_name": "cc", "value": 1}'
-```
+   ```bash
+   mqttx pub -i emqx_c -t t/1 -m '{ "table": "timeseries_demo_with_data", "measurement": "foo", "microsecond_timestamp": 1734924039271024, "column_name": "cc", "value": 1}'
+   ```
 
-Check the running status of the Sink, there should be one new incoming and one new outgoing message.
+2. Check the running status of the Sink, there should be one new incoming and one new outgoing message.
 
-Go to the [Tablestore Console](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6) to check if the data has been written into Tablestore. Enter the metric name (in this demo, it is `foo`), with the client ID `123456`. Use `client=123456` as the query condition, then click **Search**.
+3. Go to the [Tablestore Console](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6) to check if the data has been written into Tablestore. 
 
-![tablestore_query_data](./assets/tablestore_query_data.png)
+   - In **Metric Name**, enter the measurement name (in this demo, it is `foo`). 
+   - In **Tag**, use `location=office1` and `device=sensor1` as the query condition, then click **Search**.
+
+   ![tablestore_query_data](./assets/tablestore_query_data.png)
 
 ## Advanced Configurations
 

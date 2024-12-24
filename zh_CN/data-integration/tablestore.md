@@ -183,19 +183,19 @@ EMQX 与 Tablestore 的数据集成目前仅支持时序模型。因此，以下
 
 您还可以点击**集成** -> **Flow 设计器**查看拓扑。可以看到 `t/#` 主题的消息经过名为 `my_rule` 的规则处理，处理结果交由 Tablestore 进行存储。
 
-## 测试规则和 Sink
+## 测试规则
 
-使用 MQTTX 向 `t/1` 主题发布消息，此操作同时会触发上下线事件：
+1. 使用 MQTTX 向 `t/1` 主题发布消息，此操作同时会触发上下线事件：
 
-```bash
-mqttx pub -i emqx_c -t t/1 -m '{ "table": "timeseries_demo_with_data", "measurement": "foo", "microsecond_timestamp": 1734924039271024, "column_name": "cc", "value": 1}'
-```
+   ```bash
+   mqttx pub -i emqx_c -t t/1 -m '{ "table": "timeseries_demo_with_data", "measurement": "foo", "microsecond_timestamp": 1734924039271024, "column_name": "cc", "value": 1}'
+   ```
 
-分别查看两个 Sink 运行统计，命中、发送成功次数均 +1。
+2. 分别查看两个 Sink 运行统计，命中、发送成功次数均 +1。
 
-前往 [Tablestore 控制台](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6) 查看数据是否已经写入 Tablestore 中。输入度量名称（演示使用的是 `foo`），client ID 为 `123456`，我们使用 `client=123456` 作为查询条件，点击查询。
+3. 前往 [Tablestore 控制台](https://account.alibabacloud.com/login/login.htm?spm=5176.12901015-2.0.0.1a364b84fgwsH6) 查看数据是否已经写入 Tablestore 中。输入度量名称（演示使用的是 `foo`），在**标签**中使用 `location=office1`, `device=sensor1` 作为查询条件，点击**查询**。
 
-![tablestore_query_data](./assets/tablestore_query_data.png)
+   ![tablestore_query_data](./assets/tablestore_query_data.png)
 
 ## 高级设置
 
