@@ -96,3 +96,13 @@ Basic publishing and subscribing operations using [MQTTX CLI](./publish-and-subs
 
    <img src="./assets/auto-sub-emqx_c.png" alt="auto-sub-emqx_c" style="zoom:60%;" />
 
+## Placeholders
+
+Auto Subscribe supports placeholders to dynamically build topics. The format of the placeholder is `${}`. The variables supported by the placeholder are:
+
+- `${clientid}`: Client ID.
+- `${username}`: Client username.
+- `${host}`: IP address when the client connects to EMQX.
+
+For example, when the client ID is `emqx_c` and the configured topic is `a/${clientid}`, the client will automatically subscribe to the topic `a/emqx_c` after connecting to EMQX.
+

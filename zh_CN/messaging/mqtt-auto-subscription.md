@@ -92,5 +92,13 @@
 
    <img src="./assets/auto-sub-emqx_c.png" alt="auto-sub-emqx_c" style="zoom:60%;" />
 
+## 占位符
 
+自动订阅支持占位符来动态的构建主题。占位符的格式为 `${}`。占位符支持的变量有：
+
+- `${clientid}`: 客户端 ID。
+- `${username}`: 客户端用户名。
+- `${host}`: 客户端连接到 EMQX 时 IP 地址。
+
+例如，当客户端 ID 为 `emqx_c`，配置主题为 `a/${clientid}` 时，客户端连接到 EMQX 后将自动订阅主题 `a/emqx_c`。
 
